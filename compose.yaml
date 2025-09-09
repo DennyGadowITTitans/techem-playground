@@ -1,0 +1,13 @@
+﻿services:
+  techem.api:
+    image: techem.api
+    build:
+      context: .
+      dockerfile: Techem.Api/Dockerfile
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+

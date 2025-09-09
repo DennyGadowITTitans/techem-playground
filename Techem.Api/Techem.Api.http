@@ -1,0 +1,29 @@
+@TechemApiHostAddress = http://localhost:5003
+@ApiKey = dev-secret-change-me
+
+### Digital Twin - Service Info (requires X-Api-Key header)
+POST {{TechemApiHostAddress}}/device/service-info?prDv=PRDV:HZ4:DEU01:56789
+X-Api-Key: {{ApiKey}}
+Content-Type: application/json
+Accept: application/json
+
+[
+  {
+    "quantity": "HCA_energy",
+    "unit": "HCA_units",
+    "subunit": "",
+    "eventTime": "2025-08-28T01:00:00Z",
+    "tariff": "",
+    "function": "instantaneous",
+    "uuid": "550e8400-e29b-41d4-a716-446655440000"
+  },
+  {
+    "quantity": "heat_energy",
+    "unit": "kWh",
+    "subunit": "",
+    "eventTime": "2025-08-28T01:00:00Z",
+    "tariff": "",
+    "function": "instantaneous",
+    "uuid": "550e8400-e29b-41d4-a716-446655440001"
+  }
+]
