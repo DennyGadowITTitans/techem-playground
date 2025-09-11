@@ -9,6 +9,13 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.5"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
+        <PackageReference Include="Grpc.AspNetCore" Version="2.57.0"/>
+        <PackageReference Include="StackExchange.Redis" Version="2.7.4"/>
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.0"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="Protos\configuration.proto" GrpcServices="Server" />
     </ItemGroup>
 
 </Project>

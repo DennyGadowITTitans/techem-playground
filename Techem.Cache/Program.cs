@@ -1,44 +1,42 @@
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Techem.Cache.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Add gRPC services
+builder.Services.AddGrpc();
+
+// Add Redis distributed cache
+var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConnectionString;
+    options.InstanceName = "TechemCache";
+});
+
+// Register application services
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
+builder.Services.AddScoped<IConfigurationDatabaseService, DummyConfigurationDatabaseService>();
+
+// Add logging
+builder.Services.AddLogging();
+
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddCheck("redis", () => HealthCheckResult.Healthy("Redis connection healthy"));
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Configure the HTTP request pipeline
+app.UseRouting();
 
-app.UseHttpsRedirection();
+// Map gRPC service
+app.MapGrpcService<ConfigurationService>();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+// Add health check endpoint
+app.MapHealthChecks("/health");
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+// Add simple endpoint for service discovery
+app.MapGet("/", () => "Techem.Cache gRPC Service is running");
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
