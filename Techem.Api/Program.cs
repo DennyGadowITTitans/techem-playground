@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.OpenApi.Models;
 using Techem.Api.Security;
 using Techem.Api.Services;
+using Techem.Cache.Protos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +44,12 @@ builder.Services.AddSwaggerGen(c =>
 
 // Add MVC controllers
 builder.Services.AddControllers();
+
+// Add gRPC client for Techem.Cache
+builder.Services.AddGrpcClient<ConfigurationService.ConfigurationServiceClient>(options =>
+{
+    options.Address = new Uri(builder.Configuration.GetValue<string>("TechemCache:GrpcAddress") ?? "https://localhost:7159");
+});
 
 // Business logic service (dummy for now)
 builder.Services.AddScoped<IGdprCheckService, DummyGdprCheckService>();

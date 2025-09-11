@@ -1,0 +1,45 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "Techem.Cache.Protos";
+
+package configuration;
+
+// Service for device configuration management
+service ConfigurationService {
+  // Gets device configuration for a specific PRDV
+  rpc GetConfiguration (GetConfigurationRequest) returns (GetConfigurationResponse);
+}
+
+// Request message for getting device configuration
+message GetConfigurationRequest {
+  string prdv = 1;
+}
+
+// Response message containing device configuration
+message GetConfigurationResponse {
+  DeviceConfiguration configuration = 1;
+  bool found = 2;
+}
+
+// Device configuration message with storage rules and intervals
+message DeviceConfiguration {
+  string prdv = 1;
+  StorageInterval storage_interval = 2;
+  bool is_storage_enabled = 3;
+  int32 max_data_age_in_days = 4;
+  string device_type = 5;
+  string last_updated = 6; // Using string for DateTime serialization
+  map<string, string> additional_properties = 7;
+}
+
+// Storage interval enumeration
+enum StorageInterval {
+  STORAGE_INTERVAL_UNKNOWN = 0;
+  STORAGE_INTERVAL_EVERY_15_MINUTES = 1;
+  STORAGE_INTERVAL_HOURLY = 2;
+  STORAGE_INTERVAL_DAILY = 3;
+  STORAGE_INTERVAL_WEEKLY = 4;
+  STORAGE_INTERVAL_EVERY_15_DAYS = 5;
+  STORAGE_INTERVAL_MONTHLY = 6;
+  STORAGE_INTERVAL_NO_STORAGE = 99;
+}
