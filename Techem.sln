@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		compose.yaml = compose.yaml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Techem.Cache", "Techem.Cache\Techem.Cache.csproj", "{C4FF0C0C-E33A-4A0C-861E-01818A77FB55}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,5 +19,9 @@ Global
 		{D1519B00-15E7-4EBB-8F8F-F2D2DEF8D3D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1519B00-15E7-4EBB-8F8F-F2D2DEF8D3D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D1519B00-15E7-4EBB-8F8F-F2D2DEF8D3D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4FF0C0C-E33A-4A0C-861E-01818A77FB55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4FF0C0C-E33A-4A0C-861E-01818A77FB55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4FF0C0C-E33A-4A0C-861E-01818A77FB55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4FF0C0C-E33A-4A0C-861E-01818A77FB55}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
