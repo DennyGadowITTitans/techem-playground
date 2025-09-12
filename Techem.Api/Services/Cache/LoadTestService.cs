@@ -13,6 +13,7 @@ public class LoadTestService : ILoadTestService
     private readonly ICacheService _cacheService;
     private readonly ILogger<LoadTestService> _logger;
     private readonly IConfiguration _configuration;
+    private readonly bool _enableDetailedLogging;
 
     public LoadTestService(
         IConfigurationService configurationService,
@@ -26,6 +27,7 @@ public class LoadTestService : ILoadTestService
         _cacheService = cacheService;
         _logger = logger;
         _configuration = configuration;
+        _enableDetailedLogging = configuration.GetValue<bool>("LoadTestLogging:EnableDetailedLogging", false);
     }
 
     public async Task<LoadTestResult> RunLoadTestAsync(int numberOfRecords, int batchSize, int concurrentTasks)
@@ -158,7 +160,7 @@ public class LoadTestService : ILoadTestService
                     await _configurationService.SetConfigurationAsync(prdv, configuration);
                     successCount++;
                     
-                    if (successCount % 1000 == 0)
+                    if (_enableDetailedLogging && successCount % 1000 == 0)
                     {
                         _logger.LogInformation("Processed {Count} records successfully", successCount + failureCount);
                     }
@@ -166,13 +168,19 @@ public class LoadTestService : ILoadTestService
                 else
                 {
                     failureCount++;
-                    _logger.LogWarning("Failed to generate configuration for PRDV: {Prdv}", prdv);
+                    if (_enableDetailedLogging)
+                    {
+                        _logger.LogWarning("Failed to generate configuration for PRDV: {Prdv}", prdv);
+                    }
                 }
             }
             catch (Exception ex)
             {
                 failureCount++;
-                _logger.LogError(ex, "Error processing PRDV: {Prdv}", prdv);
+                if (_enableDetailedLogging)
+                {
+                    _logger.LogError(ex, "Error processing PRDV: {Prdv}", prdv);
+                }
             }
         }
 

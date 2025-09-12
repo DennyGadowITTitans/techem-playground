@@ -6,17 +6,22 @@ public class DummyConfigurationDatabaseService : IConfigurationDatabaseService
 {
     private readonly ILogger<DummyConfigurationDatabaseService> _logger;
     private readonly int _simulatedDelayMs;
+    private readonly bool _enableDetailedLogging;
 
     public DummyConfigurationDatabaseService(ILogger<DummyConfigurationDatabaseService> logger,
         IConfiguration configuration)
     {
         _logger = logger;
         _simulatedDelayMs = configuration.GetValue<int>("DatabaseSimulation:DelayMs", 2000); // Default 2 seconds
+        _enableDetailedLogging = configuration.GetValue<bool>("LoadTestLogging:EnableDetailedLogging", false);
     }
 
     public async Task<DeviceConfiguration?> GetConfigurationAsync(string prdv)
     {
-        _logger.LogInformation("Simulating database query for PRDV: {Prdv}", prdv);
+        if (_enableDetailedLogging)
+        {
+            _logger.LogInformation("Simulating database query for PRDV: {Prdv}", prdv);
+        }
 
         // Simulate database load with artificial delay
         await Task.Delay(_simulatedDelayMs);
@@ -45,9 +50,12 @@ public class DummyConfigurationDatabaseService : IConfigurationDatabaseService
             AdditionalProperties = GenerateAdditionalProperties(deviceType)
         };
 
-        _logger.LogInformation(
-            "Generated configuration for PRDV: {Prdv}, DeviceType: {DeviceType}, StorageInterval: {StorageInterval}, StorageEnabled: {StorageEnabled}",
-            prdv, deviceType, storageInterval, isStorageEnabled);
+        if (_enableDetailedLogging)
+        {
+            _logger.LogInformation(
+                "Generated configuration for PRDV: {Prdv}, DeviceType: {DeviceType}, StorageInterval: {StorageInterval}, StorageEnabled: {StorageEnabled}",
+                prdv, deviceType, storageInterval, isStorageEnabled);
+        }
 
         return configuration;
     }

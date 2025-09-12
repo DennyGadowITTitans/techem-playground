@@ -10,15 +10,18 @@ public class ConfigurationService : IConfigurationService
     private readonly ICacheService _cacheService;
     private readonly IConfigurationDatabaseService _databaseService;
     private readonly ILogger<ConfigurationService> _logger;
+    private readonly bool _enableDetailedLogging;
 
     public ConfigurationService(
         ICacheService cacheService,
         IConfigurationDatabaseService databaseService,
-        ILogger<ConfigurationService> logger)
+        ILogger<ConfigurationService> logger,
+        IConfiguration configuration)
     {
         _cacheService = cacheService;
         _databaseService = databaseService;
         _logger = logger;
+        _enableDetailedLogging = configuration.GetValue<bool>("LoadTestLogging:EnableDetailedLogging", false);
     }
 
     public async Task<DeviceConfiguration?> GetConfigurationAsync(string prdv)
@@ -67,8 +70,11 @@ public class ConfigurationService : IConfigurationService
             }
 
             // Step 4: Return the result
-            _logger.LogInformation("Retrieved configuration for PRDV: {Prdv} from database (DeviceType: {DeviceType})", 
-                prdv, dbConfig.DeviceType);
+            if (_enableDetailedLogging)
+            {
+                _logger.LogInformation("Retrieved configuration for PRDV: {Prdv} from database (DeviceType: {DeviceType})", 
+                    prdv, dbConfig.DeviceType);
+            }
             return dbConfig;
         }
         catch (Exception ex)
@@ -138,7 +144,10 @@ public class ConfigurationService : IConfigurationService
 
             // Cache the updated configuration
             await _cacheService.SetConfigurationAsync(prdv, configuration);
-            _logger.LogInformation("Successfully updated and cached configuration for PRDV: {Prdv}", prdv);
+            if (_enableDetailedLogging)
+            {
+                _logger.LogInformation("Successfully updated and cached configuration for PRDV: {Prdv}", prdv);
+            }
         }
         catch (Exception ex)
         {
