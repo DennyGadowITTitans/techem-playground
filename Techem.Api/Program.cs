@@ -53,6 +53,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 // Add cache services - using Azure Table Storage as primary cache
 builder.Services.AddScoped<ICacheService, AzureTableStorageCacheService>();
+// builder.Services.AddScoped<ICacheService, RedisCacheService>();
 builder.Services.AddScoped<IConfigurationDatabaseService, DummyConfigurationDatabaseService>();
 
 // Add configuration service that implements cache-aside pattern

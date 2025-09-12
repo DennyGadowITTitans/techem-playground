@@ -75,6 +75,53 @@ public class RedisCacheService : ICacheService
         }
     }
 
+    public async Task<int> SetConfigurationsBatchAsync(Dictionary<string, DeviceConfiguration> configurations)
+    {
+        if (configurations == null || !configurations.Any())
+        {
+            return 0;
+        }
+
+        var successCount = 0;
+        var options = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = _defaultExpiration
+        };
+
+        try
+        {
+            // Redis doesn't have native batch operations like Azure Table Storage
+            // So we'll use parallel processing for improved performance
+            var tasks = configurations.Select(async kvp =>
+            {
+                try
+                {
+                    var cacheKey = GetCacheKey(kvp.Key);
+                    var serializedData = JsonSerializer.Serialize(kvp.Value);
+                    await _distributedCache.SetStringAsync(cacheKey, serializedData, options);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error setting configuration in batch for PRDV: {Prdv}", kvp.Key);
+                    return false;
+                }
+            });
+
+            var results = await Task.WhenAll(tasks);
+            successCount = results.Count(r => r);
+
+            _logger.LogInformation("Batch operation completed: {SuccessCount}/{TotalCount} configurations processed", 
+                successCount, configurations.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in batch configuration operation");
+        }
+
+        return successCount;
+    }
+
     private static string GetCacheKey(string prdv)
     {
         return $"config:{prdv}";

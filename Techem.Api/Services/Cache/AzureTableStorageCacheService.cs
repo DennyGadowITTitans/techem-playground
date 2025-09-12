@@ -86,8 +86,6 @@ public class AzureTableStorageCacheService : ICacheService
 
     public async Task<DeviceConfiguration?> GetConfigurationAsync(string prdv)
     {
-        await EnsureTableInitializedAsync();
-        
         try
         {
             var response = await _tableClient.GetEntityAsync<DeviceConfigurationEntity>("config", prdv);
@@ -119,8 +117,6 @@ public class AzureTableStorageCacheService : ICacheService
 
     public async Task SetConfigurationAsync(string prdv, DeviceConfiguration configuration)
     {
-        await EnsureTableInitializedAsync();
-        
         try
         {
             var entity = DeviceConfigurationEntity.FromDeviceConfiguration(configuration, prdv);
@@ -137,8 +133,6 @@ public class AzureTableStorageCacheService : ICacheService
 
     public async Task<bool> ExistsAsync(string prdv)
     {
-        await EnsureTableInitializedAsync();
-        
         try
         {
             var response = await _tableClient.GetEntityAsync<DeviceConfigurationEntity>("config", prdv);
@@ -164,6 +158,60 @@ public class AzureTableStorageCacheService : ICacheService
         }
     }
 
+    public async Task<int> SetConfigurationsBatchAsync(Dictionary<string, DeviceConfiguration> configurations)
+    {
+        if (configurations == null || !configurations.Any())
+        {
+            return 0;
+        }
+
+        var successCount = 0;
+        const int maxBatchSize = 100; // Azure Table Storage batch limit
+
+        try
+        {
+            // Group by partition key (all our entities use "config" partition)
+            var batches = configurations
+                .Select(kvp => new { Prdv = kvp.Key, Config = kvp.Value })
+                .Chunk(maxBatchSize)
+                .ToList();
+
+            foreach (var batch in batches)
+            {
+                var batchOperations = new List<TableTransactionAction>();
+                
+                foreach (var item in batch)
+                {
+                    var entity = DeviceConfigurationEntity.FromDeviceConfiguration(item.Config, item.Prdv);
+                    entity.ExpiresAt = DateTimeOffset.UtcNow.Add(_defaultTtl);
+                    
+                    batchOperations.Add(new TableTransactionAction(TableTransactionActionType.UpsertReplace, entity));
+                }
+
+                try
+                {
+                    var response = await _tableClient.SubmitTransactionAsync(batchOperations);
+                    successCount += batchOperations.Count;
+                    _logger.LogDebug("Successfully processed batch of {Count} configurations", batchOperations.Count);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing batch of {Count} configurations", batchOperations.Count);
+                    // Continue with next batch instead of failing completely
+                }
+            }
+
+            _logger.LogInformation("Batch operation completed: {SuccessCount}/{TotalCount} configurations processed", 
+                successCount, configurations.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in batch configuration operation");
+        }
+
+        return successCount;
+    }
+
     private async Task DeleteEntitySafely(string partitionKey, string rowKey)
     {
         try
@@ -182,6 +230,13 @@ public class AzureTableStorageCacheService : ICacheService
 /// </summary>
 public class DeviceConfigurationEntity : ITableEntity
 {
+    // Optimized JSON serializer options for better performance
+    private static readonly JsonSerializerOptions JsonOptions = new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = null, // Use exact property names
+        WriteIndented = false // Minimize size for better performance
+    };
+
     public string PartitionKey { get; set; } = string.Empty;
     public string RowKey { get; set; } = string.Empty;
     public DateTimeOffset? Timestamp { get; set; }
@@ -208,7 +263,7 @@ public class DeviceConfigurationEntity : ITableEntity
             DeviceType = config.DeviceType,
             LastUpdated = config.LastUpdated,
             AdditionalPropertiesJson = config.AdditionalProperties.Any() 
-                ? JsonSerializer.Serialize(config.AdditionalProperties) 
+                ? JsonSerializer.Serialize(config.AdditionalProperties, JsonOptions) 
                 : null
         };
     }
@@ -235,7 +290,7 @@ public class DeviceConfigurationEntity : ITableEntity
         {
             try
             {
-                var additionalProps = JsonSerializer.Deserialize<Dictionary<string, string>>(AdditionalPropertiesJson);
+                var additionalProps = JsonSerializer.Deserialize<Dictionary<string, string>>(AdditionalPropertiesJson, JsonOptions);
                 if (additionalProps != null)
                 {
                     config.AdditionalProperties = additionalProps;
