@@ -58,6 +58,9 @@ builder.Services.AddScoped<IConfigurationDatabaseService, DummyConfigurationData
 // Add configuration service that implements cache-aside pattern
 builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 
+// Add load testing service
+builder.Services.AddScoped<ILoadTestService, LoadTestService>();
+
 // Business logic service (dummy for now)
 builder.Services.AddScoped<IGdprCheckService, DummyGdprCheckService>();
 
