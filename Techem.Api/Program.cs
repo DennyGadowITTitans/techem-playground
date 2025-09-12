@@ -51,9 +51,12 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
 });
 
-// Add cache services
-builder.Services.AddScoped<ICacheService, RedisCacheService>();
+// Add cache services - using Azure Table Storage as primary cache
+builder.Services.AddScoped<ICacheService, AzureTableStorageCacheService>();
 builder.Services.AddScoped<IConfigurationDatabaseService, DummyConfigurationDatabaseService>();
+
+// Add configuration service that implements cache-aside pattern
+builder.Services.AddScoped<IConfigurationService, ConfigurationService>();
 
 // Business logic service (dummy for now)
 builder.Services.AddScoped<IGdprCheckService, DummyGdprCheckService>();

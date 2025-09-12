@@ -17,6 +17,8 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
         <PackageReference Include="StackExchange.Redis" Version="2.7.4"/>
         <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.0"/>
+        <PackageReference Include="Azure.Data.Tables" Version="12.8.3"/>
+        <PackageReference Include="Azure.Identity" Version="1.10.4"/>
     </ItemGroup>
 
     <ItemGroup>

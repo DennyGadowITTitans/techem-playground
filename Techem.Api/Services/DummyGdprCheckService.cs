@@ -6,14 +6,14 @@ namespace Techem.Api.Services;
 
 public class DummyGdprCheckService : IGdprCheckService
 {
-    private readonly ICacheService _cacheService;
+    private readonly IConfigurationService _configurationService;
     private readonly ILogger<DummyGdprCheckService> _logger;
 
     public DummyGdprCheckService(
-        ICacheService cacheService, 
+        IConfigurationService configurationService, 
         ILogger<DummyGdprCheckService> logger)
     {
-        _cacheService = cacheService;
+        _configurationService = configurationService;
         _logger = logger;
     }
 
@@ -21,28 +21,28 @@ public class DummyGdprCheckService : IGdprCheckService
     {
         var now = DateTime.UtcNow;
 
-        // Get device configuration from cache service
+        // Get device configuration using cache-aside pattern
         DeviceConfiguration? deviceConfig = null;
         if (!string.IsNullOrEmpty(prDv))
         {
             try
             {
-                _logger.LogInformation("Getting device configuration from cache, PRDV: {PrDv}", prDv);
-                deviceConfig = await _cacheService.GetConfigurationAsync(prDv);
+                _logger.LogInformation("Getting device configuration using cache-aside pattern, PRDV: {PrDv}", prDv);
+                deviceConfig = await _configurationService.GetConfigurationAsync(prDv);
                 
                 if (deviceConfig != null)
                 {
-                    _logger.LogInformation("Retrieved device configuration from cache: DeviceType={DeviceType}, StorageEnabled={StorageEnabled}", 
+                    _logger.LogInformation("Retrieved device configuration: DeviceType={DeviceType}, StorageEnabled={StorageEnabled}", 
                         deviceConfig.DeviceType, deviceConfig.IsStorageEnabled);
                 }
                 else
                 {
-                    _logger.LogWarning("Device configuration not found in cache for PRDV: {PrDv}", prDv);
+                    _logger.LogWarning("Device configuration not found for PRDV: {PrDv}", prDv);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting device configuration from cache for PRDV: {PrDv}", prDv);
+                _logger.LogError(ex, "Error getting device configuration for PRDV: {PrDv}", prDv);
             }
         }
 
