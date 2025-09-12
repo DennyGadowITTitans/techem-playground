@@ -1,6 +1,6 @@
-﻿using Techem.Cache.Models;
+﻿using Techem.Api.Models.Cache;
 
-namespace Techem.Cache.Services;
+namespace Techem.Api.Services.Cache;
 
 public interface ICacheService
 {

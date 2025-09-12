@@ -1,4 +1,4 @@
-﻿namespace Techem.Cache.Models;
+﻿namespace Techem.Api.Models.Cache;
 
 /// <summary>
 /// Storage interval enumeration defining how often data can be stored

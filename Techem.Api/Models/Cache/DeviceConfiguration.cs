@@ -1,4 +1,4 @@
-﻿namespace Techem.Cache.Models;
+﻿namespace Techem.Api.Models.Cache;
 
 /// <summary>
 /// Device configuration containing storage rules and intervals for data persistence decisions

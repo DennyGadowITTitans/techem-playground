@@ -2,7 +2,7 @@ using System.Reflection;
 using Microsoft.OpenApi.Models;
 using Techem.Api.Security;
 using Techem.Api.Services;
-using Techem.Cache.Protos;
+using Techem.Api.Services.Cache;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,11 +45,15 @@ builder.Services.AddSwaggerGen(c =>
 // Add MVC controllers
 builder.Services.AddControllers();
 
-// Add gRPC client for Techem.Cache
-builder.Services.AddGrpcClient<ConfigurationService.ConfigurationServiceClient>(options =>
+// Add Redis cache
+builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Address = new Uri(builder.Configuration.GetValue<string>("TechemCache:GrpcAddress") ?? "https://localhost:7159");
+    options.Configuration = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
 });
+
+// Add cache services
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
+builder.Services.AddScoped<IConfigurationDatabaseService, DummyConfigurationDatabaseService>();
 
 // Business logic service (dummy for now)
 builder.Services.AddScoped<IGdprCheckService, DummyGdprCheckService>();

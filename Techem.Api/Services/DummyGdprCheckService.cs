@@ -1,18 +1,19 @@
 ﻿using Techem.Api.Models;
-using Techem.Cache.Protos;
+using Techem.Api.Models.Cache;
+using Techem.Api.Services.Cache;
 
 namespace Techem.Api.Services;
 
 public class DummyGdprCheckService : IGdprCheckService
 {
-    private readonly ConfigurationService.ConfigurationServiceClient _configurationClient;
+    private readonly ICacheService _cacheService;
     private readonly ILogger<DummyGdprCheckService> _logger;
 
     public DummyGdprCheckService(
-        ConfigurationService.ConfigurationServiceClient configurationClient, 
+        ICacheService cacheService, 
         ILogger<DummyGdprCheckService> logger)
     {
-        _configurationClient = configurationClient;
+        _cacheService = cacheService;
         _logger = logger;
     }
 
@@ -20,19 +21,17 @@ public class DummyGdprCheckService : IGdprCheckService
     {
         var now = DateTime.UtcNow;
 
-        // Call Techem.Cache to get device configuration
+        // Get device configuration from cache service
         DeviceConfiguration? deviceConfig = null;
         if (!string.IsNullOrEmpty(prDv))
         {
             try
             {
-                _logger.LogInformation("Calling Techem.Cache for device configuration, PRDV: {PrDv}", prDv);
-                var request = new GetConfigurationRequest { Prdv = prDv };
-                var response = await _configurationClient.GetConfigurationAsync(request);
+                _logger.LogInformation("Getting device configuration from cache, PRDV: {PrDv}", prDv);
+                deviceConfig = await _cacheService.GetConfigurationAsync(prDv);
                 
-                if (response.Found && response.Configuration != null)
+                if (deviceConfig != null)
                 {
-                    deviceConfig = response.Configuration;
                     _logger.LogInformation("Retrieved device configuration from cache: DeviceType={DeviceType}, StorageEnabled={StorageEnabled}", 
                         deviceConfig.DeviceType, deviceConfig.IsStorageEnabled);
                 }
@@ -43,7 +42,7 @@ public class DummyGdprCheckService : IGdprCheckService
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error calling Techem.Cache for PRDV: {PrDv}", prDv);
+                _logger.LogError(ex, "Error getting device configuration from cache for PRDV: {PrDv}", prDv);
             }
         }
 

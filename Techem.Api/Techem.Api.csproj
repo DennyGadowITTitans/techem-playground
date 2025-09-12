@@ -15,10 +15,8 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.5"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
-        <PackageReference Include="Grpc.Net.Client" Version="2.57.0"/>
-        <PackageReference Include="Grpc.Net.ClientFactory" Version="2.57.0"/>
-        <PackageReference Include="Google.Protobuf" Version="3.25.1"/>
-        <PackageReference Include="Grpc.Tools" Version="2.57.0" PrivateAssets="All"/>
+        <PackageReference Include="StackExchange.Redis" Version="2.7.4"/>
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -27,8 +25,5 @@
       </Content>
     </ItemGroup>
 
-    <ItemGroup>
-        <Protobuf Include="Protos\configuration.proto" GrpcServices="Client" />
-    </ItemGroup>
 
 </Project>
