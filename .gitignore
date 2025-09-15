@@ -351,3 +351,9 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 appsettings.*.json
+
+
+# Load Test Reports
+Techem.Api/LoadTestReports/*
+# Documents
+Documents/*
