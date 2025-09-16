@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
+using Techem.Api.Models.Cache;
 
 namespace Techem.Api.Services.Cache;
 
@@ -144,9 +145,10 @@ public class LoadTestService : ILoadTestService
 
     private async Task<(int successCount, int failureCount)> ProcessBatchAsync(List<string> prdvs)
     {
-        var successCount = 0;
+        var configurations = new Dictionary<string, DeviceConfiguration>();
         var failureCount = 0;
 
+        // Generate all configurations for the batch
         foreach (var prdv in prdvs)
         {
             try
@@ -156,14 +158,7 @@ public class LoadTestService : ILoadTestService
                 
                 if (configuration != null)
                 {
-                    // Store directly in cache/table storage via ConfigurationService
-                    await _configurationService.SetConfigurationAsync(prdv, configuration);
-                    successCount++;
-                    
-                    if (_enableDetailedLogging && successCount % 1000 == 0)
-                    {
-                        _logger.LogInformation("Processed {Count} records successfully", successCount + failureCount);
-                    }
+                    configurations[prdv] = configuration;
                 }
                 else
                 {
@@ -181,6 +176,27 @@ public class LoadTestService : ILoadTestService
                 {
                     _logger.LogError(ex, "Error processing PRDV: {Prdv}", prdv);
                 }
+            }
+        }
+
+        // Use batch operation to store all configurations at once
+        var successCount = 0;
+        if (configurations.Count > 0)
+        {
+            try
+            {
+                successCount = await _configurationService.SetConfigurationsBatchAsync(configurations);
+                
+                if (_enableDetailedLogging && successCount % 1000 == 0)
+                {
+                    _logger.LogInformation("Processed {Count} records successfully in batch", successCount);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in batch configuration operation for {Count} configurations", configurations.Count);
+                // If batch fails, treat all as failures
+                failureCount += configurations.Count;
             }
         }
 

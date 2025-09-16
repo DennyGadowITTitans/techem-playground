@@ -31,4 +31,11 @@ public interface IConfigurationService
     /// <param name="prdv">The PRDV identifier of the device</param>
     /// <param name="configuration">The updated configuration</param>
     Task SetConfigurationAsync(string prdv, DeviceConfiguration configuration);
+    
+    /// <summary>
+    /// Updates multiple device configurations in a batch operation for improved performance
+    /// </summary>
+    /// <param name="configurations">Dictionary of PRDV to DeviceConfiguration mappings</param>
+    /// <returns>Number of successfully processed configurations</returns>
+    Task<int> SetConfigurationsBatchAsync(Dictionary<string, DeviceConfiguration> configurations);
 }

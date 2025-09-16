@@ -155,4 +155,40 @@ public class ConfigurationService : IConfigurationService
             throw;
         }
     }
+
+    public async Task<int> SetConfigurationsBatchAsync(Dictionary<string, DeviceConfiguration> configurations)
+    {
+        if (configurations == null || !configurations.Any())
+        {
+            _logger.LogWarning("SetConfigurationsBatchAsync called with empty or null configurations");
+            return 0;
+        }
+
+        try
+        {
+            // Ensure consistency for all configurations
+            var now = DateTime.UtcNow;
+            foreach (var kvp in configurations)
+            {
+                kvp.Value.PrDv = kvp.Key;
+                kvp.Value.LastUpdated = now;
+            }
+
+            // Use the underlying cache service batch operation
+            var successCount = await _cacheService.SetConfigurationsBatchAsync(configurations);
+            
+            if (_enableDetailedLogging)
+            {
+                _logger.LogInformation("Successfully processed batch: {SuccessCount}/{TotalCount} configurations cached", 
+                    successCount, configurations.Count);
+            }
+            
+            return successCount;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error setting configurations in batch operation");
+            throw;
+        }
+    }
 }
