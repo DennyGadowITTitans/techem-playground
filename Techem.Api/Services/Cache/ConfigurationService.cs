@@ -21,7 +21,7 @@ public class ConfigurationService : IConfigurationService
         _cacheService = cacheService;
         _databaseService = databaseService;
         _logger = logger;
-        _enableDetailedLogging = configuration.GetValue<bool>("LoadTestLogging:EnableDetailedLogging", false);
+        _enableDetailedLogging = configuration.GetValue("LoadTestLogging:EnableDetailedLogging", false);
     }
 
     public async Task<DeviceConfiguration?> GetConfigurationAsync(string prdv)

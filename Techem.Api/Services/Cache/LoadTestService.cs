@@ -44,7 +44,7 @@ public class LoadTestService : ILoadTestService
             CacheServiceType = _cacheService.GetType().Name
         };
 
-        var stopwatch = Stopwatch.StartNew();
+        Stopwatch stopwatch = new();
         var successCount = 0;
         var failureCount = 0;
 
@@ -59,7 +59,8 @@ public class LoadTestService : ILoadTestService
             // Process records in batches with concurrency control
             var batches = CreateBatches(prdvs, batchSize);
             var semaphore = new SemaphoreSlim(concurrentTasks, concurrentTasks);
-            
+
+            stopwatch.Start();
             var tasks = batches.Select(async batch =>
             {
                 await semaphore.WaitAsync();
