@@ -200,7 +200,7 @@ public class AzureTableStorageCacheService : ICacheService
                 }
             }
 
-            _logger.LogInformation("Batch operation completed: {SuccessCount}/{TotalCount} configurations processed", 
+            _logger.LogDebug("Batch operation completed: {SuccessCount}/{TotalCount} configurations processed", 
                 successCount, configurations.Count);
         }
         catch (Exception ex)

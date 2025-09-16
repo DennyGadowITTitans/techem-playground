@@ -111,7 +111,7 @@ public class RedisCacheService : ICacheService
             var results = await Task.WhenAll(tasks);
             successCount = results.Count(r => r);
 
-            _logger.LogInformation("Batch operation completed: {SuccessCount}/{TotalCount} configurations processed", 
+            _logger.LogDebug("Batch operation completed: {SuccessCount}/{TotalCount} configurations processed", 
                 successCount, configurations.Count);
         }
         catch (Exception ex)
