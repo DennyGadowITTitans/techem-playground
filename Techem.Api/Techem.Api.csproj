@@ -19,6 +19,7 @@
         <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.0"/>
         <PackageReference Include="Azure.Data.Tables" Version="12.8.3"/>
         <PackageReference Include="Azure.Identity" Version="1.10.4"/>
+        <PackageReference Include="MessagePack" Version="2.5.140"/>
     </ItemGroup>
 
     <ItemGroup>
