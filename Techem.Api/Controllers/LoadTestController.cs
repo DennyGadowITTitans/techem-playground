@@ -52,7 +52,7 @@ public class LoadTestController : ControllerBase
             return BadRequest("Batch size must be greater than 0");
         }
 
-        if (concurrentTasks <= 0 || concurrentTasks > 50)
+        if (concurrentTasks <= 0 || concurrentTasks > 200)
         {
             return BadRequest("Concurrent tasks must be between 1 and 50");
         }
